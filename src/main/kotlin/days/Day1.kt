@@ -3,9 +3,11 @@ package days
 class Day1 : Day(1) {
 
     override fun partOne(): Any {
-        return inputList.take(2)
-            .map { it.uppercase() }
-            .joinToString(" ")
+        val digits = inputList.map { line ->
+            line.toCharArray().filter { it.isDigit() }.map { it.digitToInt() }
+        }
+        return digits.map { 10 * it.first() + it.last() }.sum()
+
     }
 
     override fun partTwo(): Any {
@@ -14,4 +16,12 @@ class Day1 : Day(1) {
             .map { it.uppercase() }
             .last()
     }
+}
+
+fun main() {
+    val partOne = Day1().partOne()
+    println("Part One: $partOne")
+
+    val partTwo = Day1().partTwo()
+    println("Part One: $partTwo")
 }
