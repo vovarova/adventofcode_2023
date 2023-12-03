@@ -1,29 +1,56 @@
 package days
 
 import util.InputReader
-
-abstract class Day(dayNumber: Int) {
-
-    var example:Boolean = false;
-
-    // lazy delegate ensures the property gets computed only on first access
-    protected val inputList: List<String> by lazy { InputReader.getInputAsList(dayNumber.toString()) }
-    protected val inputString: String by lazy { InputReader.getInputAsString(dayNumber.toString()) }
+import java.io.File
 
 
-    protected val inputListExamplePart1: List<String> by lazy { InputReader.getInputAsList("${dayNumber}_ex_1") }
-    protected val inputListExamplePart2: List<String> by lazy { InputReader.getInputAsList("${dayNumber}_ex_2") }
+abstract class Day(val dayNumber: Int) {
+    inner class Input(val useExample: Boolean, val input: InputPart) {
+        fun getInputString(): String {
+            return getInputFile().readText()
+        }
+
+        fun getInputList(): List<String> {
+            return getInputFile().readLines()
+        }
+
+        fun getInputFile(): File {
+            return getInputFile(input, useExample)
+        }
+    }
+
+    enum class InputPart {
+        PART1, PART2
+    }
+
+    fun getInputFile(input: InputPart, useExample: Boolean): File {
+        if (!useExample) {
+            return InputReader.file(dayNumber, InputReader.Input.TASK)
+        }
+        return when (input) {
+            InputPart.PART1 -> InputReader.file(dayNumber, InputReader.Input.EXAMPLE1)
+            InputPart.PART2 -> InputReader.file(dayNumber, InputReader.Input.EXAMPLE1)
+        }
+    }
+
+    abstract fun partOne(input: Input): Any
+
+    abstract fun partTwo(input: Input): Any
+
+    fun partOne(): Any {
+        return partOne(Input(useExample = false, InputPart.PART1))
+    }
 
 
-    protected val inputStringExamplePart1: String by lazy { InputReader.getInputAsString("${dayNumber}_ex_1") }
-    protected val inputStringExamplePart2: String by lazy { InputReader.getInputAsString("${dayNumber}_ex_2") }
+    fun partTwo(): Any {
+        return partTwo(Input(useExample = false, InputPart.PART2))
+    }
 
+    fun run() {
+        println("Example Part One: ${partOne(Input(useExample = true, InputPart.PART1))}")
+        println("Real Part One: ${partOne(Input(useExample = false, InputPart.PART1))}")
 
-    val inputListPart1:List<String> by lazy { if (example) inputListExamplePart1 else inputList }
-    val inputListPart2:List<String> by lazy { if (example) inputListExamplePart2 else inputList }
-
-    abstract fun partOne(): Any
-
-    abstract fun partTwo(): Any
-
+        println("Example Part Two: ${partTwo(Input(useExample = true, InputPart.PART2))}")
+        println("Real Part Two: ${partTwo(Input(useExample = false, InputPart.PART2))}")
+    }
 }

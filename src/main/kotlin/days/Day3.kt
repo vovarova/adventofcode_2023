@@ -5,7 +5,7 @@ import util.Matrix
 
 class Day3 : Day(3) {
 
-    fun gridNumbers(input: List<String>): MutableList<Pair<Int, List<GridCell<Char>>>> {
+    private fun gridNumbers(input: List<String>): MutableList<Pair<Int, List<GridCell<Char>>>> {
         val matrix = Matrix(input.map {
             it.toCharArray().toTypedArray()
         }.toTypedArray())
@@ -40,8 +40,8 @@ class Day3 : Day(3) {
         return gridNumbers;
     }
 
-    override fun partOne(): Any {
-        val validNumbers = gridNumbers(inputListPart1).filter {
+    override fun partOne(input: Input): Any {
+        val validNumbers = gridNumbers(input.getInputList()).filter {
             it.second.any {
                 it.diagonalNeighbours().any {
                     it.value != '.' && !it.value.isDigit()
@@ -54,8 +54,8 @@ class Day3 : Day(3) {
         return validNumbers.map { it.first }.sum()
     }
 
-    override fun partTwo(): Any {
-        return gridNumbers(inputListPart2).flatMap {
+    override fun partTwo(input: Input): Any {
+        return gridNumbers(input.getInputList()).flatMap {
             it.second.flatMap {
                 mutableListOf<GridCell<Char>>().also { elements ->
                     elements.addAll(it.straightNeighbours())
@@ -71,18 +71,6 @@ class Day3 : Day(3) {
 }
 
 fun main() {
-
-    val example = Day3().also {
-        it.example = true
-    }
-    println("Example Part One: ${example.partOne()}")
-    println("Example Part Two: ${example.partTwo()}")
-
-    val real = Day3().also {
-        it.example = false
-    }
-
-    println("Real Part One: ${real.partOne()}")
-    println("Real Part Two: ${real.partTwo()}")
+    Day3().run()
 }
 

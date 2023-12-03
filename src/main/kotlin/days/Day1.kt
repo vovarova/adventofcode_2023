@@ -2,8 +2,8 @@ package days
 
 class Day1 : Day(1) {
 
-    override fun partOne(): Any {
-        val digits = inputListPart1.map { line ->
+    override fun partOne(input: Input): Any {
+        val digits = input.getInputList().map { line ->
             line.toCharArray().filter { it.isDigit() }.map { it.digitToInt() }
         }
 
@@ -11,7 +11,7 @@ class Day1 : Day(1) {
 
     }
 
-    override fun partTwo(): Any {
+    override fun partTwo(input: Input): Any {
         val replacement = listOf(
             Pair("one", 1),
             Pair("two", 2),
@@ -33,7 +33,7 @@ class Day1 : Day(1) {
             Pair("9", 9),
         )
 
-        val digits = inputListPart2.map { line ->
+        val digits = input.getInputList().map { line ->
             val map = replacement.flatMap {
                 val mutableListOf = mutableListOf<Pair<Int, Pair<String, Int>>>()
                 var prevIndex = line.indexOf(it.first, 0)
@@ -55,18 +55,6 @@ class Day1 : Day(1) {
 }
 
 fun main() {
-
-    val example = Day1().also { day1 ->
-        day1.example = true
-    }
-    println("Example Part One: ${example.partOne()}")
-    println("Example Part Two: ${example.partTwo()}")
-
-    val real = Day1().also { day1 ->
-        day1.example = false
-    }
-
-    println("Real Part One: ${real.partOne()}")
-    println("Real Part Two: ${real.partTwo()}")
+    Day1().run()
 }
 

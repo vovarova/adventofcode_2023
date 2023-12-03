@@ -35,14 +35,14 @@ class Day2 : Day(2) {
         }
     }
 
-    override fun partOne(): Any {
+    override fun partOne(input: Input): Any {
         val template = BallSet().apply {
             red = 12
             blue = 14
             green = 13
         }
 
-        val lines = lines(inputListPart1)
+        val lines = lines(input.getInputList())
 
         val filter = lines.filter {
             it.sets.all {
@@ -54,8 +54,8 @@ class Day2 : Day(2) {
         return filter.map { it.game }.sum()
     }
 
-    override fun partTwo(): Any {
-        val lines = lines(inputListPart2)
+    override fun partTwo(input: Input): Any {
+        val lines = lines(input.getInputList())
 
         return lines.map {
             it.sets.map { it.green }.max() * it.sets.map { it.blue }.max() * it.sets.map { it.red }.max()
@@ -65,18 +65,6 @@ class Day2 : Day(2) {
 }
 
 fun main() {
-
-    val example = Day2().also {
-        it.example = true
-    }
-    println("Example Part One: ${example.partOne()}")
-    println("Example Part Two: ${example.partTwo()}")
-
-    val real = Day2().also {
-        it.example = false
-    }
-
-    println("Real Part One: ${real.partOne()}")
-    println("Real Part Two: ${real.partTwo()}")
+    Day2().run()
 }
 
