@@ -1,9 +1,10 @@
 package days
 
 import util.GridCell
+import util.DayInput
 import util.Matrix
 
-class Day3 : Day(3) {
+class Day3 : Day("3") {
 
     private fun gridNumbers(input: List<String>): MutableList<Pair<Int, List<GridCell<Char>>>> {
         val matrix = Matrix(input.map {
@@ -40,8 +41,8 @@ class Day3 : Day(3) {
         return gridNumbers;
     }
 
-    override fun partOne(input: Input): Any {
-        val validNumbers = gridNumbers(input.getInputList()).filter {
+    override fun partOne(dayInput: DayInput): Any {
+        val validNumbers = gridNumbers(dayInput.inputList()).filter {
             it.second.any {
                 it.diagonalNeighbours().any {
                     it.value != '.' && !it.value.isDigit()
@@ -54,8 +55,8 @@ class Day3 : Day(3) {
         return validNumbers.map { it.first }.sum()
     }
 
-    override fun partTwo(input: Input): Any {
-        return gridNumbers(input.getInputList()).flatMap {
+    override fun partTwo(dayInput: DayInput): Any {
+        return gridNumbers(dayInput.inputList()).flatMap {
             it.second.flatMap {
                 mutableListOf<GridCell<Char>>().also { elements ->
                     elements.addAll(it.straightNeighbours())

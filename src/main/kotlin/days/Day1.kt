@@ -1,17 +1,17 @@
 package days
 
-class Day1 : Day(1) {
+import util.DayInput
 
-    override fun partOne(input: Input): Any {
-        val digits = input.getInputList().map { line ->
+class Day1 : Day("1") {
+
+    override fun partOne(dayInput: DayInput): Any {
+        val digits = dayInput.inputList().map { line ->
             line.toCharArray().filter { it.isDigit() }.map { it.digitToInt() }
         }
-
         return digits.map { 10 * it.first() + it.last() }.sum()
-
     }
 
-    override fun partTwo(input: Input): Any {
+    override fun partTwo(dayInput: DayInput): Any {
         val replacement = listOf(
             Pair("one", 1),
             Pair("two", 2),
@@ -33,7 +33,7 @@ class Day1 : Day(1) {
             Pair("9", 9),
         )
 
-        val digits = input.getInputList().map { line ->
+        val digits = dayInput.inputList().map { line ->
             val map = replacement.flatMap {
                 val mutableListOf = mutableListOf<Pair<Int, Pair<String, Int>>>()
                 var prevIndex = line.indexOf(it.first, 0)

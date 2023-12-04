@@ -1,13 +1,15 @@
 package days
 
-class Day4 : Day(4) {
+import util.DayInput
 
-    override fun partOne(input: Input): Any {
-        return input.getInputList()
+class Day4 : Day("4") {
+
+    override fun partOne(dayInput: DayInput): Any {
+        return dayInput.inputList()
     }
 
-    override fun partTwo(input: Input): Any {
-        return input.getInputList()
+    override fun partTwo(dayInput: DayInput): Any {
+        return dayInput.inputList()
     }
 }
 

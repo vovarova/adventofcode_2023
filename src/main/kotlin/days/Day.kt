@@ -1,56 +1,29 @@
 package days
 
-import util.InputReader
-import java.io.File
+import util.DAY_FILE
+import util.DayInput
 
 
-abstract class Day(val dayNumber: Int) {
-    inner class Input(val useExample: Boolean, val input: InputPart) {
-        fun getInputString(): String {
-            return getInputFile().readText()
-        }
+abstract class Day(private val dayNumber: String) {
 
-        fun getInputList(): List<String> {
-            return getInputFile().readLines()
-        }
+    abstract fun partOne(dayInput: DayInput): Any
 
-        fun getInputFile(): File {
-            return getInputFile(input, useExample)
-        }
-    }
-
-    enum class InputPart {
-        PART1, PART2
-    }
-
-    fun getInputFile(input: InputPart, useExample: Boolean): File {
-        if (!useExample) {
-            return InputReader.file(dayNumber, InputReader.Input.TASK)
-        }
-        return when (input) {
-            InputPart.PART1 -> InputReader.file(dayNumber, InputReader.Input.EXAMPLE1)
-            InputPart.PART2 -> InputReader.file(dayNumber, InputReader.Input.EXAMPLE1)
-        }
-    }
-
-    abstract fun partOne(input: Input): Any
-
-    abstract fun partTwo(input: Input): Any
+    abstract fun partTwo(dayInput: DayInput): Any
 
     fun partOne(): Any {
-        return partOne(Input(useExample = false, InputPart.PART1))
+        return partOne(DayInput(day = dayNumber, DAY_FILE.INPUT))
     }
 
 
     fun partTwo(): Any {
-        return partTwo(Input(useExample = false, InputPart.PART2))
+        return partTwo(DayInput(day = dayNumber, DAY_FILE.INPUT))
     }
 
     fun run() {
-        println("Example Part One: ${partOne(Input(useExample = true, InputPart.PART1))}")
-        println("Real Part One: ${partOne(Input(useExample = false, InputPart.PART1))}")
+        println("Example Part One: ${partOne(DayInput(day = dayNumber, DAY_FILE.EXAMPLE1))}")
+        println("Real Part One: ${partOne(DayInput(day = dayNumber, DAY_FILE.INPUT))}")
 
-        println("Example Part Two: ${partTwo(Input(useExample = true, InputPart.PART2))}")
-        println("Real Part Two: ${partTwo(Input(useExample = false, InputPart.PART2))}")
+        println("Example Part Two: ${partTwo(DayInput(day = dayNumber, DAY_FILE.EXAMPLE2))}")
+        println("Real Part Two: ${partTwo(DayInput(day = dayNumber, DAY_FILE.INPUT))}")
     }
 }
