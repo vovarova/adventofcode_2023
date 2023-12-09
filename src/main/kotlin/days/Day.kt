@@ -26,4 +26,5 @@ abstract class Day(private val dayNumber: String) {
         println("Example Part Two: ${partTwo(DayInput(day = dayNumber, DAY_FILE.EXAMPLE2))}")
         println("Real Part Two: ${partTwo(DayInput(day = dayNumber, DAY_FILE.INPUT))}")
     }
+
 }
