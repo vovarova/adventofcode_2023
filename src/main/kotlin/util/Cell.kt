@@ -33,6 +33,10 @@ data class GridCell<T>(private val cell: Cell, private val config: GridConfig<T>
     fun diagonalNeighbours(): List<GridCell<T>> =
         listOf(up().left(), up().right(), down().right(), down().left()).filter { it.valid() }
 
+
+    fun neighbours(): List<GridCell<T>> = straightNeighbours() + diagonalNeighbours()
+
+
     override fun toString(): String {
         return "(row:${cell.row},column:${cell.column},value:${value})"
     }
@@ -65,6 +69,35 @@ class Matrix<T>(val matrixGrid: Array<Array<T>>) : Iterable<GridCell<T>> {
                 GridCell(Cell(row, column), config)
             }
         }.iterator()
+    }
+
+    fun column(column: Int): List<GridCell<T>> {
+        return IntStream.range(0, matrixGrid.size).mapToObj { i -> i }.map { row ->
+            GridCell(Cell(row, column), config)
+        }.toList()
+    }
+
+
+    fun firstRow(): List<GridCell<T>> {
+        return row(0)
+    }
+
+    fun lastRow(): List<GridCell<T>> {
+        return row(matrixGrid.size - 1)
+    }
+
+    fun firstColumn(): List<GridCell<T>> {
+        return column(0)
+    }
+
+    fun lastColumn(): List<GridCell<T>> {
+        return column(matrixGrid[0].size - 1)
+    }
+
+    fun row(row: Int): List<GridCell<T>> {
+        return IntStream.range(0, matrixGrid[0].size).mapToObj { i -> i }.map { column ->
+            GridCell(Cell(row, column), config)
+        }.toList()
     }
 
     companion object {
