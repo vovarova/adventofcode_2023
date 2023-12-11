@@ -1,5 +1,6 @@
 package days
 
+import util.DAY_FILE
 import util.DayInput
 import util.GridCell
 import util.Matrix
@@ -19,14 +20,17 @@ class Day10 : Day("10") {
     */
 
     enum class Item(val value: Char, val direction1: Direction?, val direction2: Direction?) {
-        VERTICAL('|', Direction.NORTH, Direction.SOUTH),
-        HORIZONTAL('-', Direction.EAST, Direction.WEST),
-        NORTH_EAST('L', Direction.NORTH, Direction.EAST),
-        NORTH_WEST('J', Direction.NORTH, Direction.WEST),
-        SOUTH_WEST('7', Direction.SOUTH, Direction.WEST),
-        SOUTH_EAST('F', Direction.SOUTH, Direction.EAST),
-        GROUND('.', null, null),
-        START('S', null, null);
+        VERTICAL('|', Direction.NORTH, Direction.SOUTH), HORIZONTAL(
+            '-',
+            Direction.EAST,
+            Direction.WEST
+        ),
+        NORTH_EAST('L', Direction.NORTH, Direction.EAST), NORTH_WEST('J', Direction.NORTH, Direction.WEST), SOUTH_WEST(
+            '7',
+            Direction.SOUTH,
+            Direction.WEST
+        ),
+        SOUTH_EAST('F', Direction.SOUTH, Direction.EAST), GROUND('.', null, null), START('S', null, null);
 
         fun directionFrom(direction: Direction): Direction? {
             return when (direction) {
@@ -43,10 +47,7 @@ class Day10 : Day("10") {
     }
 
     enum class Direction() {
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST;
+        NORTH, SOUTH, EAST, WEST;
 
         fun opposite(): Direction {
             return when (this) {
@@ -55,6 +56,19 @@ class Day10 : Day("10") {
                 EAST -> WEST
                 WEST -> EAST
             }
+        }
+
+        fun right(): Direction {
+            return when (this) {
+                NORTH -> EAST
+                SOUTH -> WEST
+                EAST -> SOUTH
+                WEST -> NORTH
+            }
+        }
+
+        fun left(): Direction {
+            return right().opposite()
         }
     }
 
@@ -85,19 +99,27 @@ class Day10 : Day("10") {
         return (goWithPath.size / 2) + (goWithPath.size % 2)
     }
 
-    fun goWithPath(start: Pair<Direction, GridCell<Item>>): List<GridCell<Item>> {
-        val result: MutableList<GridCell<Item>> = mutableListOf()
+    fun goWithPath(start: Pair<Direction, GridCell<Item>>): MutableList<Pair<Direction, GridCell<Item>>> {
+        val result: MutableList<Pair<Direction, GridCell<Item>>> = mutableListOf()
         var count = 0
         var current = start
         while (current.second.value != Item.START) {
             count++
-            result.add(current.second)
+            result.add(current)
             val newDirection = current.second.value.directionFrom(current.first.opposite())!!
             current = cellDirection(current.second, newDirection)
         }
         return result
     }
 
+    fun straightCellDirections(cell: GridCell<Item>): List<Pair<Direction, GridCell<Item>>> {
+        return listOf(
+            cellDirection(cell, Direction.NORTH),
+            cellDirection(cell, Direction.SOUTH),
+            cellDirection(cell, Direction.EAST),
+            cellDirection(cell, Direction.WEST)
+        )
+    }
 
     override fun partTwo(dayInput: DayInput): Any {
         val map = dayInput.inputList().map {
@@ -105,104 +127,60 @@ class Day10 : Day("10") {
         }.toTypedArray()
         val matrix = Matrix<Item>(map)
         val startCell = matrix.find { it.value == Item.START }!!
-        val first = listOf(
-            cellDirection(startCell, Direction.NORTH),
-            cellDirection(startCell, Direction.SOUTH),
-            cellDirection(startCell, Direction.EAST),
-            cellDirection(startCell, Direction.WEST)
-        ).filter { it.second.valid() }.filter { it.second.value != Item.GROUND }.first()
+        val first =
+            straightCellDirections(startCell).filter { it.second.valid() }.filter { it.second.value != Item.GROUND }
+                .first()
+
+
         val goWithPath = goWithPath(first)
-        val mainTiles = (listOf(startCell.apply { value = Item.VERTICAL }) + goWithPath)
-        val toSet = mainTiles.toSet()
-
-        val squizeTiles = findSquizeTiles(mainTiles)
+        val mainTiles = goWithPath + listOf(goWithPath.last().first to startCell)
+        val mainTilesSet = mainTiles.map { it.second }.toSet()
 
 
+        val startFrom = (matrix.lastRow() + matrix.firstRow() + matrix.lastColumn() + matrix.firstColumn()).filterNot {
+            mainTilesSet.contains(it)
+        }.distinct()
         val visited =
-            visit(toSet, squizeTiles, matrix.lastRow() + matrix.firstRow() + matrix.lastColumn() + matrix.firstColumn())
+            visit(mainTiles, startFrom)
 
-        val filterNot = matrix.filterNot { visited.contains(it) }.filterNot { mainTiles.contains(it) }
+        val right =false/* mainTiles.map { it to straightCellDirections(it.second).find { pair -> visited.contains(pair.second) } }
+                .filter { it.second != null }.map { it.first.first.right() == it.second!!.first }.first()*/
 
-        return filterNot
+
+
+
+        val hiddentAreas = mainTiles.map {
+            val newDirection = if (right) it.first.right() else it.first.left()
+            cellDirection(it.second, newDirection)
+        }.filter { it.second.valid() }.filterNot { visited.contains(it.second) }.filterNot { mainTilesSet.contains(it.second) }
+
+        val hiddenValues = hiddentAreas.map { it.second }.distinct()
+
+        val gridCells = visit(mainTiles, hiddenValues) + visited
+
+        return matrix.count()-gridCells.size-mainTilesSet.size
     }
 
     fun visit(
-        mainTiles: Set<GridCell<Item>>,
-        squize: Set<GridCell<Item>>,
-        startFrom: List<GridCell<Item>>
+        mainTiles: List<Pair<Direction, GridCell<Item>>>, startFrom: List<GridCell<Item>>
     ): Set<GridCell<Item>> {
+        val mainTilesSet = mainTiles.map { it.second }.toSet()
         val visited: MutableSet<GridCell<Item>> = mutableSetOf()
         val linkedList = LinkedList<GridCell<Item>>()
         linkedList.addAll(startFrom)
-
         while (linkedList.isNotEmpty()) {
             val current = linkedList.removeFirst()
-            if (visited.contains(current)) {
+            if (current.valid()&& (visited.contains(current) || mainTilesSet.contains(current))) {
                 continue
             }
             visited.add(current)
-            current.straightNeighbours()
-                .filterNot { visited.contains(it) }
-                .filterNot { mainTiles.contains(it) }
-                .forEach {
-                    linkedList.add(it)
-                }
-
-            listOf(current.up().left(), current.up().right()).filter { it.valid() }.windowed(2, 1).filter {
-                squize.containsAll(it)
-            }.map { listOf(Direction.NORTH, Direction.SOUTH) to it }.filter { pair ->
-                listOf(
-                    pair.second[0].value.direction1,
-                    pair.second[0].value.direction2
-                ).filter { pair.first.contains(it) }.any()
-
-            }.filter { pair ->
-                listOf(
-                    pair.second[1].value.direction1,
-                    pair.second[1].value.direction2
-                ).filter { pair.first.contains(it) }.any()
-            }.map { it.second }.forEach {
-                linkedList.addAll(it)
-            }
-
-
-            listOf(current.up().left(), current.up().right()).filter { it.valid() }.windowed(2, 1).filter {
-                squize.containsAll(it)
-            }.map { listOf(Direction.NORTH, Direction.SOUTH) to it }.filter { pair ->
-                listOf(
-                    pair.second[0].value.direction1,
-                    pair.second[0].value.direction2
-                ).filter { pair.first.contains(it) }.any()
-
-            }.filter { pair ->
-                listOf(
-                    pair.second[1].value.direction1,
-                    pair.second[1].value.direction2
-                ).filter { pair.first.contains(it) }.any()
-            }.map { it.second }.forEach {
-                linkedList.addAll(it)
-            }
+            linkedList.addAll(current.straightNeighbours())
         }
-
         return visited
-    }
-
-    fun findSquizeTiles(items: List<GridCell<Item>>): Set<GridCell<Item>> {
-        val elementsSet = items.toSet()
-        val gridCells = listOf(items.last()) + items + listOf(items.first())
-
-        return gridCells.windowed(3, 1).flatMap { path ->
-            val current = path[1]
-            current.straightNeighbours()
-                .filter { comparingItem ->
-                    !path.contains(comparingItem)
-                }.filter { elementsSet.contains(it) }
-
-        }.toSet()
     }
 }
 
 fun main() {
-    Day10().run()
+    println(Day10().partTwo(DayInput(day = "10", DAY_FILE.INPUT)))
 }
 
