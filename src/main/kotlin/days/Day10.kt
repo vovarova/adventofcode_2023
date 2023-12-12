@@ -20,17 +20,22 @@ class Day10 : Day("10") {
     */
 
     enum class Item(val value: Char, val direction1: Direction?, val direction2: Direction?) {
-        VERTICAL('|', Direction.NORTH, Direction.SOUTH), HORIZONTAL(
+        VERTICAL('|', Direction.NORTH, Direction.SOUTH),
+        HORIZONTAL(
             '-',
             Direction.EAST,
             Direction.WEST
         ),
-        NORTH_EAST('L', Direction.NORTH, Direction.EAST), NORTH_WEST('J', Direction.NORTH, Direction.WEST), SOUTH_WEST(
+        NORTH_EAST('L', Direction.NORTH, Direction.EAST),
+        NORTH_WEST('J', Direction.NORTH, Direction.WEST),
+        SOUTH_WEST(
             '7',
             Direction.SOUTH,
             Direction.WEST
         ),
-        SOUTH_EAST('F', Direction.SOUTH, Direction.EAST), GROUND('.', null, null), START('S', null, null);
+        SOUTH_EAST('F', Direction.SOUTH, Direction.EAST),
+        GROUND('.', null, null),
+        START('S', null, null);
 
         fun directionFrom(direction: Direction): Direction? {
             return when (direction) {
@@ -141,36 +146,44 @@ class Day10 : Day("10") {
             mainTilesSet.contains(it)
         }.distinct()
         val visited =
-            visit(mainTiles, startFrom)
+            visit(mainTilesSet, startFrom)
 
-        val right =false/* mainTiles.map { it to straightCellDirections(it.second).find { pair -> visited.contains(pair.second) } }
-                .filter { it.second != null }.map { it.first.first.right() == it.second!!.first }.first()*/
+        val right = true/*= mainTiles.map { it to straightCellDirections(it.second).find { pair -> visited.contains(pair.second) } }
+                .filter { it.second != null }.map { it.first.first.right() == it.second!!.first }.first()
+*/
 
+        val hiddentAreas = mainTiles.filter { it.second.value!=Item.START }.flatMap {item->
 
+            val direction1 = item.second.value.directionFrom(item.first.opposite())!!
+            val direction2 = item.first
+            listOf(direction1, direction2)
+                .map {
+                    if (right) it.right() else it.left()
+                }.map {
+                    cellDirection(item.second, it)
+                }
 
-
-        val hiddentAreas = mainTiles.map {
-            val newDirection = if (right) it.first.right() else it.first.left()
-            cellDirection(it.second, newDirection)
-        }.filter { it.second.valid() }.filterNot { visited.contains(it.second) }.filterNot { mainTilesSet.contains(it.second) }
+        }.filter { it.second.valid() }
+            .filterNot { visited.contains(it.second) }
+            .filterNot { mainTilesSet.contains(it.second) }
 
         val hiddenValues = hiddentAreas.map { it.second }.distinct()
 
-        val gridCells = visit(mainTiles, hiddenValues) + visited
+        val gridCells = visit(mainTilesSet, hiddenValues) + visited
 
-        return matrix.count()-gridCells.size-mainTilesSet.size
+
+        return matrix.count() - gridCells.size - mainTilesSet.size
     }
 
     fun visit(
-        mainTiles: List<Pair<Direction, GridCell<Item>>>, startFrom: List<GridCell<Item>>
+        mainTiles: Set<GridCell<Item>>, startFrom: List<GridCell<Item>>
     ): Set<GridCell<Item>> {
-        val mainTilesSet = mainTiles.map { it.second }.toSet()
         val visited: MutableSet<GridCell<Item>> = mutableSetOf()
         val linkedList = LinkedList<GridCell<Item>>()
         linkedList.addAll(startFrom)
         while (linkedList.isNotEmpty()) {
             val current = linkedList.removeFirst()
-            if (current.valid()&& (visited.contains(current) || mainTilesSet.contains(current))) {
+            if (current.valid() && (visited.contains(current) || mainTiles.contains(current))) {
                 continue
             }
             visited.add(current)
@@ -181,6 +194,6 @@ class Day10 : Day("10") {
 }
 
 fun main() {
-    println(Day10().partTwo(DayInput(day = "10", DAY_FILE.INPUT)))
+    println(Day10().partOne(DayInput(day = "10", DAY_FILE.INPUT)))
 }
 

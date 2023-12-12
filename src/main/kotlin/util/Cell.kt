@@ -18,7 +18,7 @@ interface GridConfig<T> {
     fun addValue(cell: Cell, value: T)
 }
 
-data class GridCell<T>(private val cell: Cell, private val config: GridConfig<T>) {
+data class GridCell<T>(val cell: Cell, private val config: GridConfig<T>) {
     var value
         get() = config.value(cell)
         set(value) = config.addValue(cell, value)
@@ -92,6 +92,14 @@ class Matrix<T>(val matrixGrid: Array<Array<T>>) : Iterable<GridCell<T>> {
 
     fun lastColumn(): List<GridCell<T>> {
         return column(matrixGrid[0].size - 1)
+    }
+
+    fun rows(): List<List<GridCell<T>>> {
+        return IntStream.range(0, matrixGrid.size).mapToObj { row(it) }.toList()
+    }
+
+    fun columns(): List<List<GridCell<T>>> {
+        return IntStream.range(0, matrixGrid[0].size).mapToObj { column(it) }.toList()
     }
 
     fun row(row: Int): List<GridCell<T>> {
